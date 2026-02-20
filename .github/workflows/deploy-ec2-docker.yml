@@ -78,16 +78,14 @@ jobs:
         env:
           ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
           IMAGE_TAG_INPUT: ${{ github.event.inputs.image_tag }}
-          USER_INSTANCE_ID: ${{ secrets.EC2_USER_INSTANCE_ID }}
-          ADMIN_INSTANCE_ID: ${{ secrets.EC2_ADMIN_INSTANCE_ID }}
-          WORKER_INSTANCE_ID: ${{ secrets.EC2_WORKER_INSTANCE_ID }}
+          PROJECT_NAME: oplust
         run: |
           set -euo pipefail
 
           IMAGE_TAG="${IMAGE_TAG_INPUT:-${GITHUB_SHA}}"
 
           deploy_service() {
-            local instance_id="$1"
+            local target_tag="$1"
             local image_uri="$2"
             local container_name="$3"
             local env_file="$4"
@@ -100,7 +98,7 @@ jobs:
             fi
 
             aws ssm send-command \
-              --instance-ids "${instance_id}" \
+              --targets "Key=tag:Name,Values=${target_tag}" \
               --document-name "AWS-RunShellScript" \
               --comment "Deploy ${container_name}:${IMAGE_TAG}" \
               --parameters commands="[
@@ -110,10 +108,12 @@ jobs:
                 \"sudo docker rm -f ${container_name} || true\",
                 \"${run_cmd}\"
               ]" \
+              --max-concurrency "1" \
+              --max-errors "1" \
               --query 'Command.CommandId' \
               --output text >/dev/null
           }
 
-          deploy_service "${USER_INSTANCE_ID}" "${ECR_REGISTRY}/oplust-api-user:${IMAGE_TAG}" "oplust-api-user" "/etc/oplust/api-user.env" "8080"
-          deploy_service "${ADMIN_INSTANCE_ID}" "${ECR_REGISTRY}/oplust-api-admin:${IMAGE_TAG}" "oplust-api-admin" "/etc/oplust/api-admin.env" "8081"
-          deploy_service "${WORKER_INSTANCE_ID}" "${ECR_REGISTRY}/oplust-transcoder:${IMAGE_TAG}" "oplust-transcoder" "/etc/oplust/transcoder.env" ""
+          deploy_service "${PROJECT_NAME}-user-ec2" "${ECR_REGISTRY}/oplust-api-user:${IMAGE_TAG}" "oplust-api-user" "/etc/oplust/api-user.env" "8080"
+          deploy_service "${PROJECT_NAME}-admin-ec2" "${ECR_REGISTRY}/oplust-api-admin:${IMAGE_TAG}" "oplust-api-admin" "/etc/oplust/api-admin.env" "8081"
+          deploy_service "${PROJECT_NAME}-worker-ec2" "${ECR_REGISTRY}/oplust-transcoder:${IMAGE_TAG}" "oplust-transcoder" "/etc/oplust/transcoder.env" ""
