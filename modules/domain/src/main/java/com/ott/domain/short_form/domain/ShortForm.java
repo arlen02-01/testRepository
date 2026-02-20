@@ -73,4 +73,14 @@ public class ShortForm extends BaseEntity {
 
     @Column(name = "master_playlist_url", columnDefinition = "TEXT")
     private String masterPlaylistUrl;
+
+    public void updateMediaKeys(
+            String posterUrl,
+            String originUrl,
+            String masterPlaylistUrl
+    ) {
+        this.posterUrl = posterUrl;
+        this.originUrl = originUrl;
+        this.masterPlaylistUrl = masterPlaylistUrl;
+    }
 }

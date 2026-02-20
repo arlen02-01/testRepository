@@ -1,0 +1,9 @@
+﻿.git
+.github
+.idea
+.gradle
+build
+**/build
+node_modules
+**/.DS_Store
+**/*.iml

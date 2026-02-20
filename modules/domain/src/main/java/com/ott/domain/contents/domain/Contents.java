@@ -77,4 +77,16 @@ public class Contents extends BaseEntity {
 
     @Column(name = "master_playlist_url", columnDefinition = "TEXT")
     private String masterPlaylistUrl;
+
+    public void updateMediaKeys(
+            String posterUrl,
+            String thumbnailUrl,
+            String originUrl,
+            String masterPlaylistUrl
+    ) {
+        this.posterUrl = posterUrl;
+        this.thumbnailUrl = thumbnailUrl;
+        this.originUrl = originUrl;
+        this.masterPlaylistUrl = masterPlaylistUrl;
+    }
 }

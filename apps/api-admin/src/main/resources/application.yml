@@ -25,3 +25,12 @@ spring:
       hibernate:
         show_sql: true
         format_sql: true
+
+aws:
+  region: ${AWS_REGION:ap-northeast-2}
+  s3:
+    bucket: ${AWS_S3_BUCKET:}
+    presign-expire-seconds: ${AWS_S3_PRESIGN_EXPIRE_SECONDS:900}
+  credentials:
+    access-key: ${AWS_ACCESS_KEY_ID:}
+    secret-key: ${AWS_SECRET_ACCESS_KEY:}
