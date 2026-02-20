@@ -12,18 +12,41 @@ Workflow file:
 - `AWS_ACCESS_KEY_ID`
 - `AWS_SECRET_ACCESS_KEY`
 - `AWS_ACCOUNT_ID`
-- `EC2_USER_INSTANCE_ID`
-- `EC2_ADMIN_INSTANCE_ID`
-- `EC2_WORKER_INSTANCE_ID`
+- `RDS_ENDPOINT` (host only)
+- `DB_USERNAME` (shared)
+- `DB_PASSWORD` (shared)
+- `API_USER_ENV` (service-specific env lines)
+- `API_ADMIN_ENV` (service-specific env lines)
+- `TRANSCODER_ENV` (service-specific env lines)
+
+## Important
+The workflow auto-generates common DB env keys:
+- `SPRING_DATASOURCE_URL=jdbc:mysql://<RDS_ENDPOINT>:3306/oplust`
+- `SPRING_DATASOURCE_USERNAME=<DB_USERNAME>`
+- `SPRING_DATASOURCE_PASSWORD=<DB_PASSWORD>`
+
+Do not include the three DB keys above in `API_USER_ENV`, `API_ADMIN_ENV`, `TRANSCODER_ENV`.
+
+## Secret format example
+`API_USER_ENV` value example:
+
+# user-service only vars (optional)
+
+`API_ADMIN_ENV` example:
+
+SPRING_PROFILES_ACTIVE=dev
+AWS_REGION=ap-northeast-2
+AWS_S3_BUCKET=your-content-bucket
+AWS_S3_PRESIGN_EXPIRE_SECONDS=900
+
+`TRANSCODER_ENV` example:
+
+# transcoder-only vars (optional)
 
 ## Required EC2 conditions
 - Docker installed
 - IAM role with ECR pull permissions
 - SSM Agent active and instance managed by Systems Manager
-- `/etc/oplust` env files exist:
-  - `/etc/oplust/api-user.env`
-  - `/etc/oplust/api-admin.env`
-  - `/etc/oplust/transcoder.env`
 
 ## One-time IAM policy for EC2 role (ECR pull)
 Attach at least:
@@ -41,10 +64,3 @@ Also keep S3 gateway endpoint for ECR layer download.
 3. Optional input `image_tag`:
    - empty: deploy current commit SHA
    - set value: deploy that tag
-
-## Verify
-On each EC2:
-- `docker ps`
-- `docker logs oplust-api-user`
-- `docker logs oplust-api-admin`
-- `docker logs oplust-transcoder`
