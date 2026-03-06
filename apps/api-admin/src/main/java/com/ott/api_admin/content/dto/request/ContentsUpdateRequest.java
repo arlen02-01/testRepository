@@ -42,13 +42,9 @@ public record ContentsUpdateRequest(
         List<@NotNull @Positive Long> tagIdList,
 
         @Schema(type = "Integer", description = "영상 길이(초)", example = "3600")
-        @PositiveOrZero
-        @NotNull
         Integer duration,
 
         @Schema(type = "Integer", description = "영상 크기(KB)", example = "512000")
-        @PositiveOrZero
-        @NotNull
         Integer videoSize,
 
         @Schema(type = "String", description = "포스터 원본 파일명(교체 시에만 입력)", example = "poster-new.jpg")
